@@ -82,6 +82,179 @@ DATA_INFO = {
             }
         }
     },
+    'waterbirds': {
+        'num_classes': 2,
+        'id': {
+            'train': {
+                'data_dir': 'images_classic/',
+                'imglist_path': 'benchmark_imglist/cifar100/train_cifar100.txt'
+            },
+            'val': {
+                'data_dir': 'images_classic/',
+                'imglist_path': 'benchmark_imglist/cifar100/val_cifar100.txt'
+            },
+            'test': {
+                'data_dir': 'images_classic/',
+                'imglist_path': 'benchmark_imglist/cifar100/test_cifar100.txt'
+            }
+        },
+        'csid': {
+            'datasets': [],
+        },
+        'ood': {
+            'val': {
+                'data_dir': 'images_classic/',
+                'imglist_path': 'benchmark_imglist/cifar100/val_tin.txt'
+            },
+            'near': {
+                'datasets': ['bg', 'sd'],
+                'bg': {
+                    'data_dir': 'images_classic/',
+                    'imglist_path':
+                    'benchmark_imglist/cifar100/test_cifar10.txt'
+                },
+                'sd': {
+                    'data_dir': 'images_classic/',
+                    'imglist_path': 'benchmark_imglist/cifar100/test_tin.txt'
+                }
+            },
+            'far': {
+                'datasets': ['mnist', 'svhn', 'texture', 'places365'],
+                'mnist': {
+                    'data_dir': 'images_classic/',
+                    'imglist_path': 'benchmark_imglist/cifar100/test_mnist.txt'
+                },
+                'svhn': {
+                    'data_dir': 'images_classic/',
+                    'imglist_path': 'benchmark_imglist/cifar100/test_svhn.txt'
+                },
+                'texture': {
+                    'data_dir': 'images_classic/',
+                    'imglist_path':
+                    'benchmark_imglist/cifar100/test_texture.txt'
+                },
+                'places365': {
+                    'data_dir': 'images_classic/',
+                    'imglist_path':
+                    'benchmark_imglist/cifar100/test_places365.txt'
+                }
+            },
+        }
+    },
+
+    'celebA': {
+        'num_classes': 2,
+        'id': {
+            'train': {
+                'data_dir': 'images_classic/',
+                'imglist_path': 'benchmark_imglist/cifar100/train_cifar100.txt'
+            },
+            'val': {
+                'data_dir': 'images_classic/',
+                'imglist_path': 'benchmark_imglist/cifar100/val_cifar100.txt'
+            },
+            'test': {
+                'data_dir': 'images_classic/',
+                'imglist_path': 'benchmark_imglist/cifar100/test_cifar100.txt'
+            }
+        },
+        'csid': {
+            'datasets': [],
+        },
+        'ood': {
+            'val': {
+                'data_dir': 'images_classic/',
+                'imglist_path': 'benchmark_imglist/cifar100/val_tin.txt'
+            },
+            'near': {
+                'datasets': ['sp_celebA'],
+                'sp_celebA': {
+                    'data_dir': 'images_classic/',
+                    'imglist_path':
+                    'benchmark_imglist/cifar100/test_cifar10.txt'
+                }
+            },
+            'far': {
+                'datasets': ['mnist', 'svhn', 'texture', 'places365'],
+                'mnist': {
+                    'data_dir': 'images_classic/',
+                    'imglist_path': 'benchmark_imglist/cifar100/test_mnist.txt'
+                },
+                'svhn': {
+                    'data_dir': 'images_classic/',
+                    'imglist_path': 'benchmark_imglist/cifar100/test_svhn.txt'
+                },
+                'texture': {
+                    'data_dir': 'images_classic/',
+                    'imglist_path':
+                    'benchmark_imglist/cifar100/test_texture.txt'
+                },
+                'places365': {
+                    'data_dir': 'images_classic/',
+                    'imglist_path':
+                    'benchmark_imglist/cifar100/test_places365.txt'
+                }
+            },
+        }
+    },
+
+     'cmnist': {
+        'num_classes': 2,
+        'id': {
+            'train': {
+                'data_dir': 'images_classic/',
+                'imglist_path': 'benchmark_imglist/cifar100/train_cifar100.txt'
+            },
+            'val': {
+                'data_dir': 'images_classic/',
+                'imglist_path': 'benchmark_imglist/cifar100/val_cifar100.txt'
+            },
+            'test': {
+                'data_dir': 'images_classic/',
+                'imglist_path': 'benchmark_imglist/cifar100/test_cifar100.txt'
+            }
+        },
+        'csid': {
+            'datasets': [],
+        },
+        'ood': {
+            'val': {
+                'data_dir': 'images_classic/',
+                'imglist_path': 'benchmark_imglist/cifar100/val_tin.txt'
+            },
+            'near': {
+                'datasets': ['sp_cmnist'],
+                'sp_cmnist': {
+                    'data_dir': 'images_classic/',
+                    'imglist_path':
+                    'benchmark_imglist/cifar100/test_cifar10.txt'
+                }
+            },
+            'far': {
+                'datasets': ['mnist', 'svhn', 'texture', 'places365'],
+                'mnist': {
+                    'data_dir': 'images_classic/',
+                    'imglist_path': 'benchmark_imglist/cifar100/test_mnist.txt'
+                },
+                'svhn': {
+                    'data_dir': 'images_classic/',
+                    'imglist_path': 'benchmark_imglist/cifar100/test_svhn.txt'
+                },
+                'texture': {
+                    'data_dir': 'images_classic/',
+                    'imglist_path':
+                    'benchmark_imglist/cifar100/test_texture.txt'
+                },
+                'places365': {
+                    'data_dir': 'images_classic/',
+                    'imglist_path':
+                    'benchmark_imglist/cifar100/test_places365.txt'
+                }
+            },
+        }
+    },
+
+      
     'cifar100': {
         'num_classes': 100,
         'id': {
@@ -141,6 +314,9 @@ DATA_INFO = {
             },
         }
     },
+
+
+    
     'imagenet200': {
         'num_classes': 200,
         'id': {
