@@ -87,15 +87,15 @@ DATA_INFO = {
         'id': {
             'train': {
                 'data_dir': 'images_classic/',
-                'imglist_path': 'benchmark_imglist/cifar100/train_cifar100.txt'
+                'imglist_path': 'benchmark_imglist/waterbirds/train_waterbirds.txt'
             },
             'val': {
                 'data_dir': 'images_classic/',
-                'imglist_path': 'benchmark_imglist/cifar100/val_cifar100.txt'
+                'imglist_path': 'benchmark_imglist/waterbirds/val_waterbirds.txt'
             },
             'test': {
                 'data_dir': 'images_classic/',
-                'imglist_path': 'benchmark_imglist/cifar100/test_cifar100.txt'
+                'imglist_path': 'benchmark_imglist/waterbirds/test_waterbirds.txt'
             }
         },
         'csid': {
@@ -104,39 +104,39 @@ DATA_INFO = {
         'ood': {
             'val': {
                 'data_dir': 'images_classic/',
-                'imglist_path': 'benchmark_imglist/cifar100/val_tin.txt'
+                'imglist_path': 'benchmark_imglist/waterbirds/val_tin.txt'
             },
             'near': {
                 'datasets': ['bg', 'sd'],
                 'bg': {
                     'data_dir': 'images_classic/',
                     'imglist_path':
-                    'benchmark_imglist/cifar100/test_cifar10.txt'
+                    'benchmark_imglist/waterbirds/test_bg.txt'
                 },
                 'sd': {
                     'data_dir': 'images_classic/',
-                    'imglist_path': 'benchmark_imglist/cifar100/test_tin.txt'
+                    'imglist_path': 'benchmark_imglist/waterbirds/test_sd.txt'
                 }
             },
             'far': {
                 'datasets': ['mnist', 'svhn', 'texture', 'places365'],
                 'mnist': {
                     'data_dir': 'images_classic/',
-                    'imglist_path': 'benchmark_imglist/cifar100/test_mnist.txt'
+                    'imglist_path': 'benchmark_imglist/waterbirds/test_mnist.txt'
                 },
                 'svhn': {
                     'data_dir': 'images_classic/',
-                    'imglist_path': 'benchmark_imglist/cifar100/test_svhn.txt'
+                    'imglist_path': 'benchmark_imglist/waterbirds/test_svhn.txt'
                 },
                 'texture': {
                     'data_dir': 'images_classic/',
                     'imglist_path':
-                    'benchmark_imglist/cifar100/test_texture.txt'
+                    'benchmark_imglist/waterbirds/test_texture.txt'
                 },
                 'places365': {
                     'data_dir': 'images_classic/',
                     'imglist_path':
-                    'benchmark_imglist/cifar100/test_places365.txt'
+                    'benchmark_imglist/waterbirds/test_places365.txt'
                 }
             },
         }
@@ -147,15 +147,15 @@ DATA_INFO = {
         'id': {
             'train': {
                 'data_dir': 'images_classic/',
-                'imglist_path': 'benchmark_imglist/cifar100/train_cifar100.txt'
+                'imglist_path': 'benchmark_imglist/celebA/train_celebA.txt'
             },
             'val': {
                 'data_dir': 'images_classic/',
-                'imglist_path': 'benchmark_imglist/cifar100/val_cifar100.txt'
+                'imglist_path': 'benchmark_imglist/celebA/val_celebA.txt'
             },
             'test': {
                 'data_dir': 'images_classic/',
-                'imglist_path': 'benchmark_imglist/cifar100/test_cifar100.txt'
+                'imglist_path': 'benchmark_imglist/celebA/test_celebA.txt'
             }
         },
         'csid': {
@@ -164,35 +164,35 @@ DATA_INFO = {
         'ood': {
             'val': {
                 'data_dir': 'images_classic/',
-                'imglist_path': 'benchmark_imglist/cifar100/val_tin.txt'
+                'imglist_path': 'benchmark_imglist/celebA/val_tin.txt'
             },
             'near': {
                 'datasets': ['sp_celebA'],
                 'sp_celebA': {
                     'data_dir': 'images_classic/',
                     'imglist_path':
-                    'benchmark_imglist/cifar100/test_cifar10.txt'
+                    'benchmark_imglist/celebA/test_sp_celebA.txt'
                 }
             },
             'far': {
                 'datasets': ['mnist', 'svhn', 'texture', 'places365'],
                 'mnist': {
                     'data_dir': 'images_classic/',
-                    'imglist_path': 'benchmark_imglist/cifar100/test_mnist.txt'
+                    'imglist_path': 'benchmark_imglist/celebA/test_mnist.txt'
                 },
                 'svhn': {
                     'data_dir': 'images_classic/',
-                    'imglist_path': 'benchmark_imglist/cifar100/test_svhn.txt'
+                    'imglist_path': 'benchmark_imglist/celebA/test_svhn.txt'
                 },
                 'texture': {
                     'data_dir': 'images_classic/',
                     'imglist_path':
-                    'benchmark_imglist/cifar100/test_texture.txt'
+                    'benchmark_imglist/celebA/test_texture.txt'
                 },
                 'places365': {
                     'data_dir': 'images_classic/',
                     'imglist_path':
-                    'benchmark_imglist/cifar100/test_places365.txt'
+                    'benchmark_imglist/celebA/test_places365.txt'
                 }
             },
         }
@@ -203,15 +203,15 @@ DATA_INFO = {
         'id': {
             'train': {
                 'data_dir': 'images_classic/',
-                'imglist_path': 'benchmark_imglist/cifar100/train_cifar100.txt'
+                'imglist_path': 'benchmark_imglist/cmnist/train_cmnist.txt'
             },
             'val': {
                 'data_dir': 'images_classic/',
-                'imglist_path': 'benchmark_imglist/cifar100/val_cifar100.txt'
+                'imglist_path': 'benchmark_imglist/cmnist/val_cmnist.txt'
             },
             'test': {
                 'data_dir': 'images_classic/',
-                'imglist_path': 'benchmark_imglist/cifar100/test_cifar100.txt'
+                'imglist_path': 'benchmark_imglist/cmnist/test_cmnist.txt'
             }
         },
         'csid': {
@@ -220,35 +220,35 @@ DATA_INFO = {
         'ood': {
             'val': {
                 'data_dir': 'images_classic/',
-                'imglist_path': 'benchmark_imglist/cifar100/val_tin.txt'
+                'imglist_path': 'benchmark_imglist/cmnist/val_tin.txt'
             },
             'near': {
                 'datasets': ['sp_cmnist'],
                 'sp_cmnist': {
                     'data_dir': 'images_classic/',
                     'imglist_path':
-                    'benchmark_imglist/cifar100/test_cifar10.txt'
+                    'benchmark_imglist/cmnist/test_sp_cmnist.txt'
                 }
             },
             'far': {
                 'datasets': ['mnist', 'svhn', 'texture', 'places365'],
                 'mnist': {
                     'data_dir': 'images_classic/',
-                    'imglist_path': 'benchmark_imglist/cifar100/test_mnist.txt'
+                    'imglist_path': 'benchmark_imglist/cmnist/test_mnist.txt'
                 },
                 'svhn': {
                     'data_dir': 'images_classic/',
-                    'imglist_path': 'benchmark_imglist/cifar100/test_svhn.txt'
+                    'imglist_path': 'benchmark_imglist/cmnist/test_svhn.txt'
                 },
                 'texture': {
                     'data_dir': 'images_classic/',
                     'imglist_path':
-                    'benchmark_imglist/cifar100/test_texture.txt'
+                    'benchmark_imglist/cmnist/test_texture.txt'
                 },
                 'places365': {
                     'data_dir': 'images_classic/',
                     'imglist_path':
-                    'benchmark_imglist/cifar100/test_places365.txt'
+                    'benchmark_imglist/cmnist/test_places365.txt'
                 }
             },
         }
@@ -504,7 +504,7 @@ dir_dict = {
     'images_classic/': [
         'cifar100', 'tin', 'tin597', 'svhn', 'cinic10', 'imagenet10', 'mnist',
         'fashionmnist', 'cifar10', 'cifar100c', 'places365', 'cifar10c',
-        'fractals_and_fvis', 'usps', 'texture', 'notmnist'
+        'fractals_and_fvis', 'usps', 'texture', 'notmnist', 'waterbirds', 'celebA', 'cmnist'
     ],
     'images_largescale/': [
         'imagenet_1k',
@@ -534,6 +534,12 @@ benchmarks_dict = {
         'imagenet_1k', 'ssb_hard', 'ninco', 'inaturalist', 'texture',
         'openimage_o', 'imagenet_v2', 'imagenet_c', 'imagenet_r'
     ],
+    'waterbird':
+    ['waterbirds', 'bg', 'sd', 'mnist', 'svhn', 'texture', 'places365'],
+    'celebA':
+    ['celebA', 'sp_celebA', 'mnist', 'svhn', 'texture', 'places365'],
+    'cmnist':
+    ['cmnist', 'sp_cmnist', 'mnist', 'svhn', 'texture', 'places365']
 }
 
 
