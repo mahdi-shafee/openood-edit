@@ -11,6 +11,8 @@ else:
 
 from openood.datasets.imglist_dataset import ImglistDataset
 from openood.preprocessors import BasePreprocessor
+from datasets.color_mnist import get_biased_mnist_dataloader
+
 
 from .preprocessor import get_default_preprocessor, ImageNetCPreProcessor
 
@@ -594,6 +596,39 @@ def data_setup(data_root, id_data_name):
 
 
 def get_id_ood_dataloader(id_name, data_root, preprocessor, **loader_kwargs):
+    if 'cmnist' in id_name:
+        dataloader_dict = {}
+        sub_dataloader_dict = {}
+        sub_dataloader_dict['val'] = get_biased_mnist_dataloader(args, root = './datasets/MNIST', batch_size=128,
+                                            data_label_correlation= args.data_label_correlation,
+                                            n_confusing_labels= 1,
+                                            train=False, partial=True, cmap = "1")
+        sub_dataloader_dict['test'] = get_biased_mnist_dataloader(args, root = './datasets/MNIST', batch_size=128,
+                                            data_label_correlation= args.data_label_correlation,
+                                            n_confusing_labels= 1,
+                                            train=False, partial=True, cmap = "1")
+        dataloader_dict['id'] = sub_dataloader_dict
+        dataloader_dict['ood'] = {}
+        dataloader_dict['ood']['val'] =  get_biased_mnist_dataloader(args, root = './datasets/MNIST', batch_size=128,
+                                            data_label_correlation= args.data_label_correlation,
+                                            n_confusing_labels= 1,
+                                            train=False, partial=True, cmap = "1")
+        testsetout = torchvision.datasets.ImageFolder(f"{root_dir}/partial_color_mnist_0&1",
+                                            transform=small_transform)
+        subset = torch.utils.data.Subset(testsetout, np.random.choice(len(testsetout), 2000, replace=False))
+        sub_dataloader_dict = {}
+        sub_dataloader_dict['sp_cmnist'] = torch.utils.data.DataLoader(subset, batch_size=128,
+                                             shuffle=True, num_workers=4) 
+        dataloader_dict['ood']['near'] = sub_dataloader_dict
+        testsetout = torchvision.datasets.ImageFolder(f"{root_dir}/LSUN_resize",
+                                            transform=small_transform)
+        subset = torch.utils.data.Subset(testsetout, np.random.choice(len(testsetout), 2000, replace=False))
+        sub_dataloader_dict = {}
+        sub_dataloader_dict['LSUN_resize'] = torch.utils.data.DataLoader(subset, batch_size=128,
+                                             shuffle=True, num_workers=4) 
+        dataloader_dict['ood']['far'] = sub_dataloader_dict
+        return dataloader_dict
+        
     if 'imagenet' in id_name:
         if tvs_new:
             if isinstance(preprocessor,
