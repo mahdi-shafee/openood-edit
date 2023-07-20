@@ -98,13 +98,13 @@ class Evaluator:
             raise TypeError(
                 'postprocessor should inherit BasePostprocessor in OpenOOD')
 
-        # # load data
-        # data_setup(data_root, id_name)
-        # loader_kwargs = {
-        #     'batch_size': batch_size,
-        #     'shuffle': shuffle,
-        #     'num_workers': num_workers
-        # }
+        # load data
+        #data_setup(data_root, id_name)
+        loader_kwargs = {
+            'batch_size': batch_size,
+            'shuffle': shuffle,
+            'num_workers': num_workers
+        }
         dataloader_dict = get_id_ood_dataloader(id_name, data_root,
                                                 preprocessor, **loader_kwargs)
 
