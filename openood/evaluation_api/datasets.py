@@ -11,7 +11,7 @@ else:
 
 from openood.datasets.imglist_dataset import ImglistDataset
 from openood.preprocessors import BasePreprocessor
-from datasets.color_mnist import get_biased_mnist_dataloader
+from openood.evaluation_api.color_mnist import get_biased_mnist_dataloader
 
 
 from .preprocessor import get_default_preprocessor, ImageNetCPreProcessor
