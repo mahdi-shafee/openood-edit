@@ -599,17 +599,17 @@ def get_id_ood_dataloader(id_name, data_root, preprocessor, **loader_kwargs):
     if 'cmnist' in id_name:
         dataloader_dict = {}
         sub_dataloader_dict = {}
-        sub_dataloader_dict['val'] = get_biased_mnist_dataloader(args, root = './datasets/MNIST', batch_size=128,
+        sub_dataloader_dict['val'] = get_biased_mnist_dataloader(root = './datasets/MNIST', batch_size=128,
                                             data_label_correlation= args.data_label_correlation,
                                             n_confusing_labels= 1,
                                             train=False, partial=True, cmap = "1")
-        sub_dataloader_dict['test'] = get_biased_mnist_dataloader(args, root = './datasets/MNIST', batch_size=128,
+        sub_dataloader_dict['test'] = get_biased_mnist_dataloader(root = './datasets/MNIST', batch_size=128,
                                             data_label_correlation= args.data_label_correlation,
                                             n_confusing_labels= 1,
                                             train=False, partial=True, cmap = "1")
         dataloader_dict['id'] = sub_dataloader_dict
         dataloader_dict['ood'] = {}
-        dataloader_dict['ood']['val'] =  get_biased_mnist_dataloader(args, root = './datasets/MNIST', batch_size=128,
+        dataloader_dict['ood']['val'] =  get_biased_mnist_dataloader(root = './datasets/MNIST', batch_size=128,
                                             data_label_correlation= args.data_label_correlation,
                                             n_confusing_labels= 1,
                                             train=False, partial=True, cmap = "1")
