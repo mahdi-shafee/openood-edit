@@ -11,7 +11,6 @@ from torch.utils import data
 from torchvision import transforms
 from torchvision.datasets import MNIST
 from torch.utils.data.distributed import DistributedSampler
-from utils import UnNormalize
 
 class BiasedMNIST(MNIST):
     """A base class for Biased-MNIST.
