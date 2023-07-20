@@ -78,12 +78,12 @@ class Evaluator:
             print(
                 'Postprocessor_name is ignored because postprocessor is passed'
             )
-        if id_name not in DATA_INFO:
-            raise ValueError(f'Dataset [{id_name}] is not supported')
+        # if id_name not in DATA_INFO:
+        #     raise ValueError(f'Dataset [{id_name}] is not supported')
 
-        # get data preprocessor
-        if preprocessor is None:
-            preprocessor = get_default_preprocessor(id_name)
+        # # get data preprocessor
+        # if preprocessor is None:
+        #     preprocessor = get_default_preprocessor(id_name)
 
         # set up config root
         if config_root is None:
@@ -98,13 +98,13 @@ class Evaluator:
             raise TypeError(
                 'postprocessor should inherit BasePostprocessor in OpenOOD')
 
-        # load data
-        data_setup(data_root, id_name)
-        loader_kwargs = {
-            'batch_size': batch_size,
-            'shuffle': shuffle,
-            'num_workers': num_workers
-        }
+        # # load data
+        # data_setup(data_root, id_name)
+        # loader_kwargs = {
+        #     'batch_size': batch_size,
+        #     'shuffle': shuffle,
+        #     'num_workers': num_workers
+        # }
         dataloader_dict = get_id_ood_dataloader(id_name, data_root,
                                                 preprocessor, **loader_kwargs)
 
