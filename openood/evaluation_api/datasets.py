@@ -600,17 +600,17 @@ def get_id_ood_dataloader(id_name, data_root, preprocessor, **loader_kwargs):
         dataloader_dict = {}
         sub_dataloader_dict = {}
         sub_dataloader_dict['val'] = get_biased_mnist_dataloader(root = './datasets/MNIST', batch_size=128,
-                                            data_label_correlation= args.data_label_correlation,
+                                            data_label_correlation= 0.45,
                                             n_confusing_labels= 1,
                                             train=False, partial=True, cmap = "1")
         sub_dataloader_dict['test'] = get_biased_mnist_dataloader(root = './datasets/MNIST', batch_size=128,
-                                            data_label_correlation= args.data_label_correlation,
+                                            data_label_correlation= 0.45,
                                             n_confusing_labels= 1,
                                             train=False, partial=True, cmap = "1")
         dataloader_dict['id'] = sub_dataloader_dict
         dataloader_dict['ood'] = {}
         dataloader_dict['ood']['val'] =  get_biased_mnist_dataloader(root = './datasets/MNIST', batch_size=128,
-                                            data_label_correlation= args.data_label_correlation,
+                                            data_label_correlation= 0.45,
                                             n_confusing_labels= 1,
                                             train=False, partial=True, cmap = "1")
         testsetout = torchvision.datasets.ImageFolder(f"{root_dir}/partial_color_mnist_0&1",
