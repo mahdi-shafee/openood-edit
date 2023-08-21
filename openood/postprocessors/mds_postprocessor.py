@@ -11,6 +11,7 @@ from .base_postprocessor import BasePostprocessor
 from .info import num_classes_dict
 
 
+
 class MDSPostprocessor(BasePostprocessor):
     def __init__(self, config):
         self.config = config
@@ -29,7 +30,7 @@ class MDSPostprocessor(BasePostprocessor):
                                   desc='Setup: ',
                                   position=0,
                                   leave=True):
-                    data, labels = batch['data'].cuda(), batch['label']
+                    data, labels = batch[0].cuda(), batch[1]
                     logits, features = net(data, return_feature=True)
                     all_feats.append(features.cpu())
                     all_labels.append(deepcopy(labels))

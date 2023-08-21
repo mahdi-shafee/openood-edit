@@ -12,7 +12,7 @@ from .info import num_classes_dict
 class OpenMax(BasePostprocessor):
     def __init__(self, config):
         super(OpenMax, self).__init__(config)
-        self.nc = num_classes_dict[config.dataset.name]
+        self.nc = 2
         self.weibull_alpha = 3
         self.weibull_threshold = 0.9
         self.weibull_tail = 20
@@ -94,8 +94,8 @@ def compute_train_score_and_mavs_and_dists(train_class_num, trainloader,
                                position=0,
                                leave=True):
             batch = next(train_dataiter)
-            data = batch['data'].cuda()
-            target = batch['label'].cuda()
+            data = batch[0].cuda()
+            target = batch[1].cuda()
 
             # this must cause error for cifar
             outputs = net(data)

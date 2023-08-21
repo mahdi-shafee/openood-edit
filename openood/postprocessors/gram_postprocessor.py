@@ -66,8 +66,8 @@ def sample_estimator(model, train_loader, num_classes, powers):
 
     # collect features and compute gram metrix
     for batch in tqdm(train_loader, desc='Compute min/max'):
-        data = batch['data'].cuda()
-        label = batch['label']
+        data = batch[0].cuda()
+        label = batch[1]
         _, feature_list = model(data, return_feature_list=True)
         label_list = tensor2list(label)
         for layer_idx in range(num_layer):

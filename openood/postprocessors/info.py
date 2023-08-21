@@ -2,5 +2,8 @@ num_classes_dict = {
     'cifar10': 10,
     'cifar100': 100,
     'imagenet200': 200,
-    'imagenet': 1000
+    'imagenet': 1000,
+    'cmnist' : 2,
+    'waterbirds' :2,
+    'celebA': 2
 }

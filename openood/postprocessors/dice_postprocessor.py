@@ -29,10 +29,10 @@ class DICEPostprocessor(BasePostprocessor):
                                   desc='Setup: ',
                                   position=0,
                                   leave=True):
-                    data = batch['data'].cuda()
+                    data = batch[0].cuda()
                     data = data.float()
 
-                    _, feature = net(data, return_feature=True)
+                    feature, _ = net(data)
                     activation_log.append(feature.data.cpu().numpy())
 
             activation_log = np.concatenate(activation_log, axis=0)

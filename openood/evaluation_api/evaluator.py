@@ -78,12 +78,12 @@ class Evaluator:
             print(
                 'Postprocessor_name is ignored because postprocessor is passed'
             )
-        if id_name not in DATA_INFO:
-            raise ValueError(f'Dataset [{id_name}] is not supported')
+        # if id_name not in DATA_INFO:
+        #     raise ValueError(f'Dataset [{id_name}] is not supported')
 
-        # get data preprocessor
-        if preprocessor is None:
-            preprocessor = get_default_preprocessor(id_name)
+        # # get data preprocessor
+        # if preprocessor is None:
+        #     preprocessor = get_default_preprocessor(id_name)
 
         # set up config root
         if config_root is None:
@@ -99,7 +99,7 @@ class Evaluator:
                 'postprocessor should inherit BasePostprocessor in OpenOOD')
 
         # load data
-        data_setup(data_root, id_name)
+        #data_setup(data_root, id_name)
         loader_kwargs = {
             'batch_size': batch_size,
             'shuffle': shuffle,
@@ -134,9 +134,9 @@ class Evaluator:
                 'val': None,
                 'test': None
             },
-            'csid': {k: None
-                     for k in dataloader_dict['csid'].keys()},
-            'ood': {
+            # 'csid': {k: None
+            #          for k in dataloader_dict['csid'].keys()},
+             'ood': {
                 'val': None,
                 'near':
                 {k: None
@@ -145,11 +145,11 @@ class Evaluator:
                         for k in dataloader_dict['ood']['far'].keys()},
             },
             'id_preds': None,
-            'id_labels': None,
-            'csid_preds': {k: None
-                           for k in dataloader_dict['csid'].keys()},
-            'csid_labels': {k: None
-                            for k in dataloader_dict['csid'].keys()},
+            'id_labels': None
+        #     'csid_preds': {k: None
+        #                    for k in dataloader_dict['csid'].keys()},
+        #     'csid_labels': {k: None
+        #                     for k in dataloader_dict['csid'].keys()},
         }
         # perform hyperparameter search if have not done so
         if (self.postprocessor.APS_mode
@@ -171,11 +171,11 @@ class Evaluator:
         all_labels = []
         with torch.no_grad():
             for batch in tqdm(data_loader, desc=msg, disable=not progress):
-                data = batch['data'].cuda()
+                data = batch[0].cuda()
                 logits = self.net(data)
                 preds = logits.argmax(1)
                 all_preds.append(preds.cpu())
-                all_labels.append(batch['label'])
+                all_labels.append(batch[1])
 
         all_preds = torch.cat(all_preds)
         all_labels = torch.cat(all_labels)
@@ -424,6 +424,7 @@ class Evaluator:
         print('Final hyperparam: {}'.format(
             self.postprocessor.get_hyperparam()))
         self.postprocessor.hyperparam_search_done = True
+
 
     def recursive_generator(self, list, n):
         if n == 1:

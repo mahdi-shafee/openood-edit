@@ -17,8 +17,9 @@ class BasePostprocessor:
 
     @torch.no_grad()
     def postprocess(self, net: nn.Module, data: Any):
-        output = net(data)
-        score = torch.softmax(output, dim=1)
+        outputs = net(data)
+        print(type(outputs))
+        score = torch.softmax(outputs, dim=1)
         conf, pred = torch.max(score, dim=1)
         return pred, conf
 
@@ -29,8 +30,8 @@ class BasePostprocessor:
         pred_list, conf_list, label_list = [], [], []
         for batch in tqdm(data_loader,
                           disable=not progress or not comm.is_main_process()):
-            data = batch['data'].cuda()
-            label = batch['label'].cuda()
+            data = batch[0].cuda()
+            label = batch[1].cuda()
             pred, conf = self.postprocess(net, data)
 
             pred_list.append(pred.cpu())

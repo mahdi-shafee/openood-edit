@@ -1,6 +1,10 @@
 import os
 import gdown
 import zipfile
+import torch
+import numpy as np
+import torchvision.transforms as transforms
+
 
 from torch.utils.data import DataLoader
 import torchvision as tvs
@@ -11,6 +15,10 @@ else:
 
 from openood.datasets.imglist_dataset import ImglistDataset
 from openood.preprocessors import BasePreprocessor
+from openood.evaluation_api.color_mnist import get_biased_mnist_dataloader, get_biased_mnist_dataset
+from openood.evaluation_api.celebA_dataset import get_celebA_dataloader, celebAOodDataset
+from openood.utils.svhn_loader import SVHN
+
 
 from .preprocessor import get_default_preprocessor, ImageNetCPreProcessor
 
@@ -594,6 +602,106 @@ def data_setup(data_root, id_data_name):
 
 
 def get_id_ood_dataloader(id_name, data_root, preprocessor, **loader_kwargs):
+    if 'cmnist' in id_name:
+        dataloader_dict = {}
+        sub_dataloader_dict = {}
+        train_set1 = get_biased_mnist_dataset(root = './datasets/MNIST', batch_size=128,
+                                        data_label_correlation= 0.45,
+                                        n_confusing_labels= 1,
+                                        train=True, partial=True, cmap = "1")
+        train_set2 = get_biased_mnist_dataset(root = './datasets/MNIST', batch_size=128,
+                                        data_label_correlation= 0.45,
+                                        n_confusing_labels= 1,
+                                        train=True, partial=True, cmap = "2")
+        trainset = [train_set2, train_set1]
+        kwargs = {'pin_memory': False, 'num_workers': 8, 'drop_last': True}
+
+
+        sub_dataloader_dict['train'] = torch.utils.data.DataLoader(dataset=torch.utils.data.ConcatDataset(trainset), batch_size=128, shuffle=True, **kwargs)
+
+        
+        sub_dataloader_dict['val'] = get_biased_mnist_dataloader(root = './datasets/MNIST', batch_size=128,
+                                            data_label_correlation= 0.45,
+                                            n_confusing_labels= 1,
+                                            train=False, partial=True, cmap = "1")
+        sub_dataloader_dict['test'] = get_biased_mnist_dataloader(root = './datasets/MNIST', batch_size=128,
+                                            data_label_correlation= 0.45,
+                                            n_confusing_labels= 1,
+                                            train=False, partial=True, cmap = "1")
+        dataloader_dict['id'] = sub_dataloader_dict
+        dataloader_dict['ood'] = {}
+        dataloader_dict['ood']['val'] =  get_biased_mnist_dataloader(root = './datasets/MNIST', batch_size=128,
+                                            data_label_correlation= 0.45,
+                                            n_confusing_labels= 1,
+                                            train=False, partial=True, cmap = "1")
+        # for mnist
+
+        small_transform = transforms.Compose([
+                transforms.Resize(32),
+                 transforms.CenterCrop(32),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=(0.5, 0.5, 0.5),
+                             std=(0.5, 0.5, 0.5))])
+        testsetout = tvs.datasets.ImageFolder("/content/gdrive/MyDrive/lab2/partial_color_mnist_0&1",
+                                            transform=small_transform)
+        subset = torch.utils.data.Subset(testsetout, np.random.choice(len(testsetout), 2000, replace=False))
+        sub_dataloader_dict = {}
+        sub_dataloader_dict['sp_cmnist'] = torch.utils.data.DataLoader(subset, batch_size=128,
+                                             shuffle=True, num_workers=4) 
+        dataloader_dict['ood']['near'] = sub_dataloader_dict
+        testsetout = tvs.datasets.ImageFolder("/content/gdrive/MyDrive/lab2/LSUN_resize",
+                                            transform=small_transform)
+        subset = torch.utils.data.Subset(testsetout, np.random.choice(len(testsetout), 2000, replace=False))
+        sub_dataloader_dict = {}
+        sub_dataloader_dict['LSUN_resize'] = torch.utils.data.DataLoader(subset, batch_size=128,
+                                             shuffle=True, num_workers=4) 
+        dataloader_dict['ood']['far'] = sub_dataloader_dict
+        return dataloader_dict
+    
+
+    if 'celebA' in id_name:
+        dataloader_dict = {}
+        sub_dataloader_dict = {}
+        train_loader = get_celebA_dataloader(split="train")
+        trainset = [train_loader]
+
+        sub_dataloader_dict['train'] = torch.utils.data.DataLoader(dataset=trainset, batch_size=128, shuffle=True, num_workers=4)
+        sub_dataloader_dict['val'] = get_celebA_dataloader(split="val")
+        sub_dataloader_dict['test'] = get_celebA_dataloader(split="test")
+        dataloader_dict['id'] = sub_dataloader_dict
+
+        dataloader_dict['ood'] = {}
+        dataloader_dict['ood']['val'] = get_celebA_dataloader(split="val")
+
+        # for celebA
+        scale = 256.0/224.0
+        target_resolution = (224, 224)
+        large_transform = transforms.Compose([
+            transforms.Resize((int(target_resolution[0]*scale), int(target_resolution[1]*scale))),
+            transforms.CenterCrop(target_resolution),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        ])
+        
+        # near
+        testsetout = celebAOodDataset()
+        subset = torch.utils.data.Subset(testsetout, np.random.choice(len(testsetout), 2000, replace=True))
+        sub_dataloader_dict = {}
+        sub_dataloader_dict['sp_celebA'] = torch.utils.data.DataLoader(subset, batch_size=128,
+                                             shuffle=True, num_workers=4) 
+        dataloader_dict['ood']['near'] = sub_dataloader_dict
+        
+        # far
+        testsetout = tvs.datasets.ImageFolder("/content/gdrive/MyDrive/lab2/LSUN_resize",
+                                            transform=large_transform)
+        subset = torch.utils.data.Subset(testsetout, np.random.choice(len(testsetout), 2000, replace=False))
+        sub_dataloader_dict = {}
+        sub_dataloader_dict['LSUN_resize'] = torch.utils.data.DataLoader(subset, batch_size=128,
+                                             shuffle=True, num_workers=4) 
+        dataloader_dict['ood']['far'] = sub_dataloader_dict
+        return dataloader_dict
+
+
     if 'imagenet' in id_name:
         if tvs_new:
             if isinstance(preprocessor,
