@@ -4,7 +4,7 @@ import zipfile
 import torch
 import numpy as np
 import torchvision.transforms as transforms
-
+from torchvision.datasets import ImageFolder
 
 from torch.utils.data import DataLoader
 import torchvision as tvs
@@ -629,11 +629,11 @@ def get_id_ood_dataloader(id_name, data_root, preprocessor, **loader_kwargs):
     if 'cmnist' in id_name:
         dataloader_dict = {}
         sub_dataloader_dict = {}
-        train_set1 = get_biased_mnist_dataset(root = './datasets/MNIST', batch_size=128,
+        train_set1 = get_biased_mnist_dataset(root = './datasets/MNIST', batch_size=64,
                                         data_label_correlation= 0.45,
                                         n_confusing_labels= 1,
                                         train=True, partial=True, cmap = "1")
-        train_set2 = get_biased_mnist_dataset(root = './datasets/MNIST', batch_size=128,
+        train_set2 = get_biased_mnist_dataset(root = './datasets/MNIST', batch_size=64,
                                         data_label_correlation= 0.45,
                                         n_confusing_labels= 1,
                                         train=True, partial=True, cmap = "2")
@@ -642,26 +642,25 @@ def get_id_ood_dataloader(id_name, data_root, preprocessor, **loader_kwargs):
 
 
         sub_dataloader_dict['train'] = torch.utils.data.DataLoader(dataset=torch.utils.data.ConcatDataset(trainset), batch_size=128, shuffle=True, **kwargs)
-
-        dataset = get_biased_mnist_dataloader(root='./datasets/MNIST', batch_size=128,
+        dataset_loader = get_biased_mnist_dataloader(root='./datasets/MNIST', batch_size=64,
                                               data_label_correlation=0.45,
                                               n_confusing_labels=1,
                                               train=False, partial=True, cmap="1")
         
-        dataset_size = len(dataset)
+        dataset_size = len(dataset_loader.dataset)
         indices = list(range(dataset_size))
         np.random.shuffle(indices)
         
         split_index = int(dataset_size * 0.5)  
         val_indices, test_indices = indices[:split_index], indices[split_index:]
-        
-        val_dataset = torch.utils.data.Subset(dataset, val_indices)
-        test_dataset = torch.utils.data.Subset(dataset, test_indices)
+
+        val_dataset = torch.utils.data.Subset(dataset_loader.dataset, val_indices)
+        test_dataset = torch.utils.data.Subset(dataset_loader.dataset, test_indices)
 
         sub_dataloader_dict['val'] = torch.utils.data.DataLoader(dataset=val_dataset,
-                                                                batch_size=128, shuffle=True, **kwargs)
+                                                                batch_size=64, shuffle=True, **kwargs)
         sub_dataloader_dict['test'] = torch.utils.data.DataLoader(dataset=test_dataset,
-                                                                 batch_size=128, shuffle=True, **kwargs)
+                                                                 batch_size=64, shuffle=True, **kwargs)
 
         dataloader_dict['id'] = sub_dataloader_dict
         dataloader_dict['ood'] = {}
@@ -672,23 +671,22 @@ def get_id_ood_dataloader(id_name, data_root, preprocessor, **loader_kwargs):
                 transforms.ToTensor(),
                 transforms.Normalize(mean=(0.5, 0.5, 0.5),
                              std=(0.5, 0.5, 0.5))])
-        testsetout = tvs.datasets.ImageFolder("/content/drive/MyDrive/lab2/partial_color_mnist_0&1",
+        testsetout = ImageFolder("/content/drive/MyDrive/SP_OOD_Experiments/Wisc/OpenOOD/Customized_OpenOOD/Customized-Open-OOD/datasets/partial_color_mnist_0&1",
                                             transform=small_transform)
         subset_indices = np.random.choice(len(testsetout), 2000, replace=False)
         subset_val_indices = subset_indices[:int(0.2 * len(subset_indices))]  # 20% for validation
         subset_near_indices = subset_indices[int(0.2 * len(subset_indices)):]  # 80% for near OOD
-
         # Create a Subset for OOD 'val'
         subset_val = torch.utils.data.Subset(testsetout, subset_val_indices)
-        sub_dataloader_dict_val = {'sp_cmnist': torch.utils.data.DataLoader(subset_val, batch_size=128, shuffle=True, num_workers=4)}
+        sub_dataloader_dict_val = {'sp_cmnist': torch.utils.data.DataLoader(subset_val, batch_size=64, shuffle=True, num_workers=4)}
         dataloader_dict['ood']['val']= sub_dataloader_dict_val
 
         # Create a Subset for OOD 'near' (80%)
         subset_near = torch.utils.data.Subset(testsetout, subset_near_indices)
-        sub_dataloader_dict_near = {'sp_cmnist': torch.utils.data.DataLoader(subset_near, batch_size=128, shuffle=True, num_workers=4)}
+        sub_dataloader_dict_near = {'sp_cmnist': torch.utils.data.DataLoader(subset_near, batch_size=64, shuffle=True, num_workers=4)}
         dataloader_dict['ood']['near'] = sub_dataloader_dict_near
         # List of additional OOD datasets
-        ood_datasets = ['gaussian', 'dtd', 'iSUN', 'LSUN_resize']
+        ood_datasets = ['gaussian','LSUN_resize']
 
         dataloader_dict['ood'].setdefault('far', {})
         dataloader_dict['ood'].setdefault('val', {})
@@ -698,7 +696,7 @@ def get_id_ood_dataloader(id_name, data_root, preprocessor, **loader_kwargs):
                 testsetout = GaussianDataset(dataset_size=10000, img_size=32,
                                             transform=transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)))
             else:
-                testsetout = tvs.ImageFolder(f"/content/gdrive/MyDrive/lab2/{dataset_name}", transform=small_transform)
+                testsetout = ImageFolder(f"/content/drive/MyDrive/SP_OOD_Experiments/Wisc/OOD_Datasets/{dataset_name}", transform=small_transform)
 
             num_samples = len(testsetout)
             val_size = int(0.2 * num_samples)  
@@ -706,13 +704,13 @@ def get_id_ood_dataloader(id_name, data_root, preprocessor, **loader_kwargs):
             # Create the 'far' subset for this dataset (80% - val_size)
             subset_far = torch.utils.data.Subset(testsetout, np.random.choice(num_samples, num_samples - val_size, replace=False))
             sub_dataloader_dict = {}
-            sub_dataloader_dict[dataset_name] = torch.utils.data.DataLoader(subset_far, batch_size=128, shuffle=True,
+            sub_dataloader_dict[dataset_name] = torch.utils.data.DataLoader(subset_far, batch_size=64, shuffle=True,
                                                                             num_workers=4)
             dataloader_dict['ood']['far'].update(sub_dataloader_dict)
 
             subset_val = torch.utils.data.Subset(testsetout, np.random.choice(num_samples, val_size, replace=False))
             sub_dataloader_dict_val = {'sp_cmnist': sub_dataloader_dict_val['sp_cmnist']}
-            sub_dataloader_dict_val[dataset_name] = torch.utils.data.DataLoader(subset_val, batch_size=128, shuffle=True,
+            sub_dataloader_dict_val[dataset_name] = torch.utils.data.DataLoader(subset_val, batch_size=64, shuffle=True,
                                                                                 num_workers=4)
             dataloader_dict['ood']['val'].update(sub_dataloader_dict_val)
         return dataloader_dict
@@ -751,7 +749,7 @@ def get_id_ood_dataloader(id_name, data_root, preprocessor, **loader_kwargs):
         dataloader_dict['ood']['near'] = sub_dataloader_dict
         
         # far
-        testsetout = tvs.datasets.ImageFolder("/content/gdrive/MyDrive/lab2/LSUN_resize",
+        testsetout = ImageFolder("/content/gdrive/MyDrive/lab2/LSUN_resize",
                                             transform=large_transform)
         subset = torch.utils.data.Subset(testsetout, np.random.choice(len(testsetout), 2000, replace=False))
         sub_dataloader_dict = {}

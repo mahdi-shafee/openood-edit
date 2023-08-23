@@ -16,7 +16,7 @@ from openood.networks.react_net import ReactNet
 from .datasets import DATA_INFO, data_setup, get_id_ood_dataloader
 from .postprocessor import get_postprocessor
 from .preprocessor import get_default_preprocessor
-
+from torchvision.datasets import ImageFolder
 
 class Evaluator:
     def __init__(
