@@ -402,9 +402,8 @@ class Evaluator:
         final_index = None
         for i, hyperparam in enumerate(hyperparam_combination):
             self.postprocessor.set_hyperparam(hyperparam)
-
             id_pred, id_conf, id_gt = self.postprocessor.inference(
-                self.net, self.dataloader_dict['id']['val'])
+                self.net, {'loader':self.dataloader_dict['id']['val']})
             ood_pred, ood_conf, ood_gt = self.postprocessor.inference(
                 self.net, self.dataloader_dict['ood']['val'])
 
