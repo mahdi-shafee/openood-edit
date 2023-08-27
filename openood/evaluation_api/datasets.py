@@ -809,16 +809,16 @@ def get_id_ood_dataloader(id_name, data_root, preprocessor, **loader_kwargs):
         dataloader_dict = {}
         sub_dataloader_dict = {}
         train_loader = get_celebA_dataloader(split="train")
-        trainset = [train_loader]
+        val_loader = get_celebA_dataloader(split="val")
+        test_loader = get_celebA_dataloader(split="test")
 
-        sub_dataloader_dict['train'] = torch.utils.data.DataLoader(dataset=trainset, batch_size=128, shuffle=True, num_workers=4)
-        sub_dataloader_dict['val'] = get_celebA_dataloader(split="val")
-        sub_dataloader_dict['test'] = get_celebA_dataloader(split="test")
+        sub_dataloader_dict['train'] = train_loader
+        sub_dataloader_dict['val'] = val_loader
+        sub_dataloader_dict['test'] = test_loader
+
         dataloader_dict['id'] = sub_dataloader_dict
-
         dataloader_dict['ood'] = {}
-
-        # for celebA
+        
         scale = 256.0/224.0
         target_resolution = (224, 224)
         large_transform = transforms.Compose([
@@ -827,47 +827,65 @@ def get_id_ood_dataloader(id_name, data_root, preprocessor, **loader_kwargs):
             transforms.ToTensor(),
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         ])
-        
-        out_datasets = ['celebA_ood', 'gaussian', 'SVHN', 'iSUN', 'LSUN_resize']
-        for dataset_name in out_datasets:
-            if dataset_name == 'celebA_ood':
-                testsetout = celebAOodDataset(transform=large_transform)
-            elif dataset_name == 'gaussian':
-                testsetout = GaussianDataset(dataset_size=10000, img_size=224, transform=large_transform)
+
+
+        ood_datasets = ['celebA_ood', 'gaussian', 'SVHN', 'iSUN', 'LSUN_resize']
+        dataloader_dict['ood'].setdefault('near', {})
+        dataloader_dict['ood'].setdefault('far', {})
+        dataloader_dict['ood'].setdefault('val', {})
+
+        for out_dataset in ood_datasets:
+            if out_dataset == "SVHN":
+                testsetout = svhn.SVHN(f"/content/drive/MyDrive/SP_OOD_Experiments/Wisc/OOD_Datasets/{out_dataset}", split='test',
+                                    transform=large_transform, download=False)
+            elif out_dataset == 'gaussian':
+                testsetout = GaussianDataset(dataset_size =10000, img_size = 224,
+                    transform=transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]))
+            elif  out_dataset == 'celebA_ood':
+                testsetout = celebAOodDataset()
             else:
-                testsetout = ImageFolder(f"path/to/{dataset_name}", transform=large_transform)
+                testsetout = tvs.datasets.ImageFolder(f"/content/drive/MyDrive/SP_OOD_Experiments/Wisc/OOD_Datasets/{out_dataset}",
+                                            transform=large_transform)
+            if out_dataset == 'celebA_ood':
+                subset = torch.utils.data.Subset(testsetout, np.random.choice(len(testsetout), 2000, replace=True))
+                testloaderOut =  
+                num_samples = len(subset)
+                val_size = int(0.2 * num_samples)  
 
-            num_samples = len(testsetout)
-            val_size = int(0.2 * num_samples)
+                val_indices = np.random.choice(num_samples, val_size, replace=False)
+                near_indices = np.random.choice(list(set(range(num_samples)) - set(val_indices)), num_samples - val_size, replace=False)
 
-            # Create the 'far' subset for this dataset (80% - val_size)
-            subset_far = torch.utils.data.Subset(testsetout, np.random.choice(num_samples, num_samples - val_size, replace=False))
-            sub_dataloader_dict = {}
-            sub_dataloader_dict[dataset_name] = torch.utils.data.DataLoader(subset_far, batch_size=64, shuffle=True, num_workers=4)
-            dataloader_dict['ood'].setdefault('far', {})
-            dataloader_dict['ood']['far'].update(sub_dataloader_dict)
+                subset_val = torch.utils.data.Subset(subset, val_indices)
+                subset_near = torch.utils.data.Subset(subset, near_indices)
+                sub_dataloader_dict = {}
+                sub_dataloader_dict['sp_celebA'] = torch.utils.data.DataLoader(subset_near, batch_size=64,
+                                                shuffle=True, num_workers=4) 
+                dataloader_dict['ood']['near'].update(sub_dataloader_dict)
 
-            # Create the 'val' subset for this dataset (20%)
-            subset_val = torch.utils.data.Subset(testsetout, np.random.choice(num_samples, val_size, replace=False))
-            sub_dataloader_dict_val = {dataset_name: torch.utils.data.DataLoader(subset_val, batch_size=64, shuffle=True, num_workers=4)}
-            dataloader_dict['ood'].setdefault('val', {})
-            dataloader_dict['ood']['val'].update(sub_dataloader_dict_val)
-        # # near
-        # testsetout = celebAOodDataset()
-        # subset = torch.utils.data.Subset(testsetout, np.random.choice(len(testsetout), 2000, replace=True))
-        # sub_dataloader_dict = {}
-        # sub_dataloader_dict['sp_celebA'] = torch.utils.data.DataLoader(subset, batch_size=128,
-        #                                      shuffle=True, num_workers=4) 
-        # dataloader_dict['ood']['near'] = sub_dataloader_dict
-        
-        # # far
-        # testsetout = ImageFolder("/content/gdrive/MyDrive/lab2/LSUN_resize",
-        #                                     transform=large_transform)
-        # subset = torch.utils.data.Subset(testsetout, np.random.choice(len(testsetout), 2000, replace=False))
-        # sub_dataloader_dict = {}
-        # sub_dataloader_dict['LSUN_resize'] = torch.utils.data.DataLoader(subset, batch_size=128,
-        #                                      shuffle=True, num_workers=4) 
-        # dataloader_dict['ood']['far'] = sub_dataloader_dict
+            else:
+                subset = torch.utils.data.Subset(testsetout, np.random.choice(len(testsetout), 2000, replace=False))
+                testloaderOut = torch.utils.data.DataLoader(subset, batch_size=args.ood_batch_size,
+                                                shuffle=True, num_workers=4)  
+
+                num_samples = len(testsetout)
+                val_size = int(0.2 * num_samples)  
+
+                val_indices = np.random.choice(num_samples, val_size, replace=False)
+                far_indices = np.random.choice(list(set(range(num_samples)) - set(val_indices)), num_samples - val_size, replace=False)
+
+                subset_val = torch.utils.data.Subset(testsetout, val_indices)
+                subset_far = torch.utils.data.Subset(testsetout, far_indices)
+                sub_dataloader_dict = {}
+                sub_dataloader_dict[dataset_name] = torch.utils.data.DataLoader(subset_far, batch_size=64, shuffle=True,
+                                                                                num_workers=4)
+                dataloader_dict['ood']['far'].update(sub_dataloader_dict)
+                sub_dataloader_dict_val = {'sp_celebA': sub_dataloader_dict_val['sp_celebA']}
+                sub_dataloader_dict_val[dataset_name] = torch.utils.data.DataLoader(subset_val, batch_size=64, shuffle=True,
+                                                                                    num_workers=4)
+                dataloader_dict['ood']['val'].update(sub_dataloader_dict_val)
+
+
+
         return dataloader_dict
 
 
