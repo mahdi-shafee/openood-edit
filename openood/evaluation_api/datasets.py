@@ -17,9 +17,11 @@ from openood.datasets.imglist_dataset import ImglistDataset
 from openood.preprocessors import BasePreprocessor
 from openood.evaluation_api.color_mnist import get_biased_mnist_dataloader, get_biased_mnist_dataset
 from openood.evaluation_api.celebA_dataset import get_celebA_dataloader, celebAOodDataset
+from openood.evaluation_api.cub_dataset import get_waterbird_dataloader
 from openood.utils.svhn_loader import SVHN
+import openood.utils.svhn_loader as svhn
 
-
+import argparse
 from .preprocessor import get_default_preprocessor, ImageNetCPreProcessor
 
 DATA_INFO = {
@@ -674,18 +676,17 @@ def get_id_ood_dataloader(id_name, data_root, preprocessor, **loader_kwargs):
         testsetout = ImageFolder("/content/drive/MyDrive/SP_OOD_Experiments/Wisc/OpenOOD/Customized_OpenOOD/Customized-Open-OOD/datasets/partial_color_mnist_0&1",
                                             transform=small_transform)
         subset_indices = np.random.choice(len(testsetout), 2000, replace=False)
-        subset_val_indices = subset_indices[:int(0.2 * len(subset_indices))]  # 20% for validation
-        subset_near_indices = subset_indices[int(0.2 * len(subset_indices)):]  # 80% for near OOD
-        # Create a Subset for OOD 'val'
+        subset_val_indices = subset_indices[:int(0.2 * len(subset_indices))]  
+        subset_near_indices = subset_indices[int(0.2 * len(subset_indices)):] 
+
         subset_val = torch.utils.data.Subset(testsetout, subset_val_indices)
         sub_dataloader_dict_val = {'sp_cmnist': torch.utils.data.DataLoader(subset_val, batch_size=64, shuffle=True, num_workers=4)}
         dataloader_dict['ood']['val']= sub_dataloader_dict_val
 
-        # Create a Subset for OOD 'near' (80%)
         subset_near = torch.utils.data.Subset(testsetout, subset_near_indices)
         sub_dataloader_dict_near = {'sp_cmnist': torch.utils.data.DataLoader(subset_near, batch_size=64, shuffle=True, num_workers=4)}
         dataloader_dict['ood']['near'] = sub_dataloader_dict_near
-        # List of additional OOD datasets
+
         ood_datasets = ['textures', 'gaussian','LSUN_resize','iSUN']
 
         dataloader_dict['ood'].setdefault('far', {})
@@ -700,21 +701,109 @@ def get_id_ood_dataloader(id_name, data_root, preprocessor, **loader_kwargs):
 
             num_samples = len(testsetout)
             val_size = int(0.2 * num_samples)  
+            val_indices = np.random.choice(num_samples, val_size, replace=False)
+            far_indices = np.random.choice(list(set(range(num_samples)) - set(val_indices)), num_samples - val_size, replace=False)
 
-            # Create the 'far' subset for this dataset (80% - val_size)
-            subset_far = torch.utils.data.Subset(testsetout, np.random.choice(num_samples, num_samples - val_size, replace=False))
+            subset_val = torch.utils.data.Subset(testsetout, val_indices)
+            subset_far = torch.utils.data.Subset(testsetout, far_indices)
             sub_dataloader_dict = {}
             sub_dataloader_dict[dataset_name] = torch.utils.data.DataLoader(subset_far, batch_size=64, shuffle=True,
                                                                             num_workers=4)
             dataloader_dict['ood']['far'].update(sub_dataloader_dict)
-
-            subset_val = torch.utils.data.Subset(testsetout, np.random.choice(num_samples, val_size, replace=False))
             sub_dataloader_dict_val = {'sp_cmnist': sub_dataloader_dict_val['sp_cmnist']}
             sub_dataloader_dict_val[dataset_name] = torch.utils.data.DataLoader(subset_val, batch_size=64, shuffle=True,
                                                                                 num_workers=4)
             dataloader_dict['ood']['val'].update(sub_dataloader_dict_val)
         return dataloader_dict
     
+    elif 'waterbirds' in id_name:
+        parser = argparse.ArgumentParser(description='OOD training for multi-label classification')
+        parser.add_argument('-b', '--batch-size', default=64, type=int,
+                    help='mini-batch size (default: 64) used for training')
+        args = parser.parse_args()
+
+        dataloader_dict = {}
+        sub_dataloader_dict = {}
+        train_loader = get_waterbird_dataloader(args, data_label_correlation=0.25, split="train")
+        val_loader = get_waterbird_dataloader(args, data_label_correlation=0.25, split="val")
+
+
+        sub_dataloader_dict['train'] = train_loader
+        
+        dataset_size = len(val_loader.dataset)
+        indices = list(range(dataset_size))
+        np.random.shuffle(indices)
+        
+        split_index = int(dataset_size * 0.5)  
+        val_indices, test_indices = indices[:split_index], indices[split_index:]
+
+        val_dataset = torch.utils.data.Subset(val_loader.dataset, val_indices)
+        test_dataset = torch.utils.data.Subset(val_loader.dataset, test_indices)
+
+        sub_dataloader_dict['val'] = torch.utils.data.DataLoader(dataset=val_dataset,
+                                                                batch_size=64, shuffle=True, **kwargs)
+        sub_dataloader_dict['test'] = torch.utils.data.DataLoader(dataset=test_dataset,
+                                                                 batch_size=64, shuffle=True, **kwargs)
+
+        dataloader_dict['id'] = sub_dataloader_dict
+        dataloader_dict['ood'] = {}
+        
+        scale = 256.0/224.0
+        target_resolution = (224, 224)
+        large_transform = transforms.Compose([
+            transforms.Resize((int(target_resolution[0]*scale), int(target_resolution[1]*scale))),
+            transforms.CenterCrop(target_resolution),
+            transforms.ToTensor(),
+            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+        ])
+
+        testsetout = ImageFolder("/content/placesbg")
+        subset_indices = np.random.choice(len(testsetout), 2000, replace=False)
+        subset_val_indices = subset_indices[:int(0.2 * len(subset_indices))]  # 20% for validation
+        subset_near_indices = subset_indices[int(0.2 * len(subset_indices)):]  # 80% for near OOD
+        # Create a Subset for OOD 'val'
+        subset_val = torch.utils.data.Subset(testsetout, subset_val_indices)
+        sub_dataloader_dict_val = {'sp_waterbirds': torch.utils.data.DataLoader(subset_val, batch_size=64, shuffle=True, num_workers=4)}
+        dataloader_dict['ood']['val']= sub_dataloader_dict_val
+
+        # Create a Subset for OOD 'near' (80%)
+        subset_near = torch.utils.data.Subset(testsetout, subset_near_indices)
+        sub_dataloader_dict_near = {'sp_waterbirds': torch.utils.data.DataLoader(subset_near, batch_size=64, shuffle=True, num_workers=4)}
+        dataloader_dict['ood']['near'] = sub_dataloader_dict_near
+        # List of additional OOD datasets
+        ood_datasets = [ 'gaussian', 'SVHN', 'iSUN', 'LSUN_resize', 'textures']
+
+        dataloader_dict['ood'].setdefault('far', {})
+        dataloader_dict['ood'].setdefault('val', {})
+
+        for dataset_name in ood_datasets:
+            if dataset_name == "SVHN":
+                testsetout = svhn.SVHN(f"/content/drive/MyDrive/SP_OOD_Experiments/Wisc/OOD_Datasets//{dataset_name}", split='test',
+                                    transform=large_transform, download=False)
+            elif dataset_name == 'gaussian':
+                testsetout = GaussianDataset(dataset_size =10000, img_size = 224,
+                    transform=transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]))
+            else:
+                testsetout = ImageFolder(f"/content/drive/MyDrive/SP_OOD_Experiments/Wisc/OOD_Datasets/{dataset_name}", transform=large_transform)
+
+            num_samples = len(testsetout)
+            val_size = int(0.2 * num_samples)  
+
+            val_indices = np.random.choice(num_samples, val_size, replace=False)
+            far_indices = np.random.choice(list(set(range(num_samples)) - set(val_indices)), num_samples - val_size, replace=False)
+
+            # Create the 'far' subset for this dataset (80% - val_size)
+            subset_val = torch.utils.data.Subset(testsetout, val_indices)
+            subset_far = torch.utils.data.Subset(testsetout, far_indices)
+            sub_dataloader_dict = {}
+            sub_dataloader_dict[dataset_name] = torch.utils.data.DataLoader(subset_far, batch_size=64, shuffle=True,
+                                                                            num_workers=4)
+            dataloader_dict['ood']['far'].update(sub_dataloader_dict)
+            sub_dataloader_dict_val = {'sp_waterbirds': sub_dataloader_dict_val['sp_waterbirds']}
+            sub_dataloader_dict_val[dataset_name] = torch.utils.data.DataLoader(subset_val, batch_size=64, shuffle=True,
+                                                                                num_workers=4)
+            dataloader_dict['ood']['val'].update(sub_dataloader_dict_val)
+        return dataloader_dict
 
     elif 'celebA' in id_name:
         dataloader_dict = {}
