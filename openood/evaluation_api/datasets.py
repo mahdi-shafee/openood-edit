@@ -562,7 +562,10 @@ class GaussianDataset(torch.utils.data.Dataset):
                 self.labels = (torch.ones(dataset_size) * num_classes).long()
             else:
                 self.labels = labels
+<<<<<<< HEAD
             torch.manual_seed(0)
+=======
+>>>>>>> origin/private-branch
             images = torch.normal(0.5, 0.5, size=(dataset_size,3,img_size,img_size))
             self.images = torch.clamp(images, 0, 1)
             self.transform = transform
@@ -655,6 +658,7 @@ def get_id_ood_dataloader(id_name, data_root, preprocessor, **loader_kwargs):
         
         dataset_size = len(dataset_loader.dataset)
         indices = list(range(dataset_size))
+        
         np.random.seed(0)
         np.random.shuffle(indices)
         

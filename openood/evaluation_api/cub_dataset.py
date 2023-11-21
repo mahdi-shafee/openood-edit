@@ -12,11 +12,15 @@ from torch.utils.data.distributed import DistributedSampler
 import warnings
 warnings.filterwarnings("ignore")
 
+<<<<<<< HEAD
 torch.manual_seed(0)
 np.random.seed(0)
 
 class WaterbirdDataset(Dataset):
-    def __init__(self, data_correlation, split, root_dir = '/home/user01/SP_OOD_Experiments/Waterbirds_dataset'):
+=======
+class WaterbirdDataset(Dataset):
+    def __init__(self, data_correlation, split, root_dir = 'datasets'):
+>>>>>>> origin/private-branch
         self.split_dict = {
             'train': 0,
             'val': 1,
@@ -29,7 +33,10 @@ class WaterbirdDataset(Dataset):
             (1, 1): 3
         }
         self.split = split
-        self.root_dir  = '/home/user01/SP_OOD_Experiments/Waterbirds_dataset'
+<<<<<<< HEAD
+=======
+        self.root_dir  = root_dir
+>>>>>>> origin/private-branch
         self.dataset_name = "waterbird_complete"+"{:0.2f}".format(data_correlation)[-2:]+"_forest2water2"
         self.dataset_dir = os.path.join(self.root_dir, self.dataset_name)
         if not os.path.exists(self.dataset_dir):
@@ -55,7 +62,10 @@ class WaterbirdDataset(Dataset):
             self.filename_array[idx])
         img = Image.open(img_filename).convert('RGB')
         img = self.transform(img)
-        # img = transforms.ToTensor()(img)
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/private-branch
         return img, y, self.env_dict[(y, place)]
     
 def get_transform_cub(train):
@@ -84,11 +94,15 @@ def get_transform_cub(train):
         ])
     return transform
 
-def get_waterbird_dataloader( data_label_correlation, split):
+<<<<<<< HEAD
+
+=======
+def get_waterbird_dataloader(args, data_label_correlation, split):
     kwargs = {'pin_memory': False, 'num_workers': 8, 'drop_last': True}
     dataset = WaterbirdDataset(data_correlation=data_label_correlation, split=split)
     dataloader = DataLoader(dataset=dataset,
-                                batch_size=4,
+                                batch_size=args.batch_size,
+>>>>>>> origin/private-branch
                                 shuffle=True,
                                 **kwargs)
     return dataloader
