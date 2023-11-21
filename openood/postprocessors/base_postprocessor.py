@@ -17,26 +17,30 @@ class BasePostprocessor:
 
     @torch.no_grad()
     def postprocess(self, net: nn.Module, data: Any):
+        device = next(net.parameters()).device  # Get the device of the model's parameters
+        data = data.to(device)
         outputs = net(data)
-        print(type(outputs))
         score = torch.softmax(outputs, dim=1)
         conf, pred = torch.max(score, dim=1)
         return pred, conf
 
     def inference(self,
                   net: nn.Module,
-                  data_loader: DataLoader,
+                  data_loaders_dict: dict,
                   progress: bool = True):
+                
+        device = next(net.parameters()).device 
         pred_list, conf_list, label_list = [], [], []
-        for batch in tqdm(data_loader,
-                          disable=not progress or not comm.is_main_process()):
-            data = batch[0].cuda()
-            label = batch[1].cuda()
-            pred, conf = self.postprocess(net, data)
+        for loader_name, data_loader in data_loaders_dict.items():
+          for batch in tqdm(data_loader,
+                            disable=not progress or not comm.is_main_process()):
+              data = batch[0].to(device)
+              label = batch[1].to(device)
+              pred, conf = self.postprocess(net, data)
 
-            pred_list.append(pred.cpu())
-            conf_list.append(conf.cpu())
-            label_list.append(label.cpu())
+              pred_list.append(pred.cpu())
+              conf_list.append(conf.cpu())
+              label_list.append(label.cpu())
 
         # convert values into numpy array
         pred_list = torch.cat(pred_list).numpy().astype(int)

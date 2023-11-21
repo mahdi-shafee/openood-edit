@@ -29,11 +29,12 @@ class KLMatchingPostprocessor(BasePostprocessor):
             all_softmax = []
             preds = []
             with torch.no_grad():
-                for batch in tqdm(id_loader_dict['val'],
+                for data, label, ground_truth in tqdm(id_loader_dict['val'],
                                   desc='Setup: ',
                                   position=0,
                                   leave=True):
-                    data = batch['data'].cuda()
+                    # data = batch['data'].cuda()
+                    data = data.cuda()
                     logits = net(data)
                     all_softmax.append(F.softmax(logits, 1).cpu())
                     preds.append(logits.argmax(1).cpu())

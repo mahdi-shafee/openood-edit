@@ -12,6 +12,9 @@ from torchvision import transforms
 from torchvision.datasets import MNIST
 from torch.utils.data.distributed import DistributedSampler
 
+np.random.seed(0)
+torch.manual_seed(0)
+
 class BiasedMNIST(MNIST):
     """A base class for Biased-MNIST.
     We manually select ten colours to synthetic colour bias. (See `COLOUR_MAP` for the colour configuration)
@@ -91,6 +94,7 @@ class BiasedMNIST(MNIST):
 
     def _shuffle(self, iteratable):
         if self.random:
+            np.random.seed(0)
             np.random.shuffle(iteratable)
 
     def _make_biased_mnist(self, indices, label, cmap):

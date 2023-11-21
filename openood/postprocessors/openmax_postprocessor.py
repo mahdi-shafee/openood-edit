@@ -11,9 +11,9 @@ from .info import num_classes_dict
 
 class OpenMax(BasePostprocessor):
     def __init__(self, config):
-        super(OpenMax, self).__init__(config)
+        super().__init__(config)
         self.nc = 2
-        self.weibull_alpha = 3
+        self.weibull_alpha = 2
         self.weibull_threshold = 0.9
         self.weibull_tail = 20
         self.setup_flag = False

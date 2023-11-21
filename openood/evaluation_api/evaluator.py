@@ -16,9 +16,12 @@ from openood.networks.react_net import ReactNet
 from .datasets import DATA_INFO, data_setup, get_id_ood_dataloader
 from .postprocessor import get_postprocessor
 from .preprocessor import get_default_preprocessor
+from torchvision.datasets import ImageFolder
 
+torch.manual_seed(0)
 
 class Evaluator:
+
     def __init__(
         self,
         net: nn.Module,
@@ -251,7 +254,7 @@ class Evaluator:
                 print(f'Performing inference on {self.id_name} test set...',
                       flush=True)
                 id_pred, id_conf, id_gt = self.postprocessor.inference(
-                    self.net, self.dataloader_dict['id']['test'], progress)
+                    self.net, {'loader':self.dataloader_dict['id']['test']}, progress)
                 self.scores['id']['test'] = [id_pred, id_conf, id_gt]
             else:
                 id_pred, id_conf, id_gt = self.scores['id']['test']
@@ -335,7 +338,7 @@ class Evaluator:
                 print(f'Performing inference on {dataset_name} dataset...',
                       flush=True)
                 ood_pred, ood_conf, ood_gt = self.postprocessor.inference(
-                    self.net, ood_dl, progress)
+                    self.net, {'loader':ood_dl}, progress)
                 self.scores['ood'][ood_split][dataset_name] = [
                     ood_pred, ood_conf, ood_gt
                 ]
@@ -402,9 +405,8 @@ class Evaluator:
         final_index = None
         for i, hyperparam in enumerate(hyperparam_combination):
             self.postprocessor.set_hyperparam(hyperparam)
-
             id_pred, id_conf, id_gt = self.postprocessor.inference(
-                self.net, self.dataloader_dict['id']['val'])
+                self.net, {'loader':self.dataloader_dict['id']['val']})
             ood_pred, ood_conf, ood_gt = self.postprocessor.inference(
                 self.net, self.dataloader_dict['ood']['val'])
 
@@ -443,3 +445,40 @@ class Evaluator:
                     k.append(x)
                     results.append(k)
             return results
+            
+
+    def run_experiments(self, num_runs=5):
+        all_near_metrics = []  # List to store "near" metrics from each run
+        all_far_metrics = []   # List to store "far" metrics from each run
+
+        for run in range(num_runs):
+            print(f"Experiment Run {run + 1} of {num_runs}")
+
+            # Perform the evaluation for this run
+            self.eval_ood(fsood=False)  # Disable fsood metrics
+
+            # Collect and store the "near" and "far" metrics for this run
+            near_metrics = self.metrics["ood"].loc["nearood"].values.tolist()
+            far_metrics = self.metrics["ood"].loc["farood"].values.tolist()
+
+            all_near_metrics.append(near_metrics)
+            all_far_metrics.append(far_metrics)
+
+        # Calculate the mean and standard deviation of "near" metrics over all runs
+        mean_near_metrics = np.mean(all_near_metrics, axis=0)
+        std_near_metrics = np.std(all_near_metrics, axis=0)
+
+        # Calculate the mean and standard deviation of "far" metrics over all runs
+        mean_far_metrics = np.mean(all_far_metrics, axis=0)
+        std_far_metrics = np.std(all_far_metrics, axis=0)
+
+        # Print or return the mean and standard deviation for both "near" and "far"
+        print("Mean Near Metrics:")
+        print(mean_near_metrics)
+        print("Standard Deviation Near Metrics:")
+        print(std_near_metrics)
+        
+        print("Mean Far Metrics:")
+        print(mean_far_metrics)
+        print("Standard Deviation Far Metrics:")
+        print(std_far_metrics)

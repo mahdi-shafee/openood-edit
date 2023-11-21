@@ -12,7 +12,7 @@ normalizer = lambda x: x / np.linalg.norm(x, axis=-1, keepdims=True) + 1e-10
 
 class DICEPostprocessor(BasePostprocessor):
     def __init__(self, config):
-        super(DICEPostprocessor, self).__init__(config)
+        super().__init__(config)
         self.args = self.config.postprocessor.postprocessor_args
         self.p = self.args.p
         self.mean_act = None
@@ -25,14 +25,14 @@ class DICEPostprocessor(BasePostprocessor):
             activation_log = []
             net.eval()
             with torch.no_grad():
-                for batch in tqdm(id_loader_dict['train'],
+                for data, label, ground_truth in tqdm(id_loader_dict['train'],
                                   desc='Setup: ',
                                   position=0,
                                   leave=True):
-                    data = batch[0].cuda()
+                    data = data.cuda()
                     data = data.float()
 
-                    feature, _ = net(data)
+                    feature = net(data)
                     activation_log.append(feature.data.cpu().numpy())
 
             activation_log = np.concatenate(activation_log, axis=0)
@@ -42,19 +42,22 @@ class DICEPostprocessor(BasePostprocessor):
             pass
 
     def calculate_mask(self, w):
-        contrib = self.mean_act[None, :] * w.data.squeeze().cpu().numpy()
+        contrib = self.mean_act[:, None] * w.data.squeeze().cpu().numpy()
         self.thresh = np.percentile(contrib, self.p)
         mask = torch.Tensor((contrib > self.thresh)).cuda()
         self.masked_w = w * mask
 
     @torch.no_grad()
     def postprocess(self, net: nn.Module, data: Any):
-        fc_weight, fc_bias = net.get_fc()
+        # fc_weight, fc_bias = net.get_fc()
+        last_fc_layer = net.linear
+        fc_weight = last_fc_layer.weight
+        fc_bias = last_fc_layer.bias
         if self.masked_w is None:
-            self.calculate_mask(torch.from_numpy(fc_weight).cuda())
+            self.calculate_mask(fc_weight.cuda())
         _, feature = net(data, return_feature=True)
         vote = feature[:, None, :] * self.masked_w
-        output = vote.sum(2) + torch.from_numpy(fc_bias).cuda()
+        output = vote.sum(2) + fc_bias.cuda()
         _, pred = torch.max(torch.softmax(output, dim=1), dim=1)
         energyconf = torch.logsumexp(output.data.cpu(), dim=1)
         return pred, energyconf

@@ -13,7 +13,7 @@ normalizer = lambda x: x / np.linalg.norm(x, axis=-1, keepdims=True) + 1e-10
 
 class KNNPostprocessor(BasePostprocessor):
     def __init__(self, config):
-        super(KNNPostprocessor, self).__init__(config)
+        super().__init__(config)
         self.args = self.config.postprocessor.postprocessor_args
         self.K = self.args.K
         self.activation_log = None
@@ -25,11 +25,11 @@ class KNNPostprocessor(BasePostprocessor):
             activation_log = []
             net.eval()
             with torch.no_grad():
-                for batch in tqdm(id_loader_dict['train'],
+                for data, label, ground_truth in tqdm(id_loader_dict['train'],
                                   desc='Setup: ',
                                   position=0,
                                   leave=True):
-                    data = batch['data'].cuda()
+                    data = data.cuda()
                     data = data.float()
 
                     _, feature = net(data, return_feature=True)

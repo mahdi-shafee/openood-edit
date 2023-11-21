@@ -16,9 +16,12 @@ class GradNormPostprocessor(BasePostprocessor):
         self.num_classes = num_classes_dict[self.config.dataset.name]
 
     def gradnorm(self, x, w, b):
-        fc = torch.nn.Linear(*w.shape[::-1])
-        fc.weight.data[...] = torch.from_numpy(w)
-        fc.bias.data[...] = torch.from_numpy(b)
+        #fc = torch.nn.Linear(*w.shape[::-1])
+        fc = torch.nn.Linear(w.size(1), w.size(0))
+        # fc.weight.data[...] = torch.from_numpy(w)
+        # fc.bias.data[...] = torch.from_numpy(b)
+        fc.weight.data = w  
+        fc.bias.data = b
         fc.cuda()
 
         targets = torch.ones((1, self.num_classes)).cuda()
@@ -41,7 +44,10 @@ class GradNormPostprocessor(BasePostprocessor):
 
     @torch.no_grad()
     def postprocess(self, net: nn.Module, data: Any):
-        w, b = net.get_fc()
+        # w, b = net.get_fc()
+        last_fc_layer = net.linear
+        w = last_fc_layer.weight
+        b = last_fc_layer.bias
         logits, features = net.forward(data, return_feature=True)
         with torch.enable_grad():
             scores = self.gradnorm(features, w, b)
