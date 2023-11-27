@@ -12,15 +12,15 @@ from torch.utils.data.distributed import DistributedSampler
 import warnings
 warnings.filterwarnings("ignore")
 
-<<<<<<< HEAD
+#<<<<<<< HEAD
 torch.manual_seed(0)
 np.random.seed(0)
 
-class WaterbirdDataset(Dataset):
-=======
+#class WaterbirdDataset(Dataset):
+#=======
 class WaterbirdDataset(Dataset):
     def __init__(self, data_correlation, split, root_dir = 'datasets'):
->>>>>>> origin/private-branch
+#>>>>>>> origin/private-branch
         self.split_dict = {
             'train': 0,
             'val': 1,
@@ -33,12 +33,13 @@ class WaterbirdDataset(Dataset):
             (1, 1): 3
         }
         self.split = split
-<<<<<<< HEAD
-=======
+#<<<<<<< HEAD
+#=======
         self.root_dir  = root_dir
->>>>>>> origin/private-branch
+#>>>>>>> origin/private-branch
         self.dataset_name = "waterbird_complete"+"{:0.2f}".format(data_correlation)[-2:]+"_forest2water2"
         self.dataset_dir = os.path.join(self.root_dir, self.dataset_name)
+        self.dataset_dir = '/content/openood-edit/content/Spurious_OOD/datasets/waterbird_complete90_forest2water2'
         if not os.path.exists(self.dataset_dir):
             raise ValueError(
                 f'{self.dataset_dir} does not exist yet. Please generate the dataset first.') 
@@ -62,10 +63,10 @@ class WaterbirdDataset(Dataset):
             self.filename_array[idx])
         img = Image.open(img_filename).convert('RGB')
         img = self.transform(img)
-<<<<<<< HEAD
-=======
+#<<<<<<< HEAD
+#=======
 
->>>>>>> origin/private-branch
+#>>>>>>> origin/private-branch
         return img, y, self.env_dict[(y, place)]
     
 def get_transform_cub(train):
@@ -94,15 +95,15 @@ def get_transform_cub(train):
         ])
     return transform
 
-<<<<<<< HEAD
+#<<<<<<< HEAD
 
-=======
-def get_waterbird_dataloader(args, data_label_correlation, split):
+#=======
+def get_waterbird_dataloader(data_label_correlation, split):
     kwargs = {'pin_memory': False, 'num_workers': 8, 'drop_last': True}
     dataset = WaterbirdDataset(data_correlation=data_label_correlation, split=split)
     dataloader = DataLoader(dataset=dataset,
-                                batch_size=args.batch_size,
->>>>>>> origin/private-branch
+                                batch_size=64,
+#>>>>>>> origin/private-branch
                                 shuffle=True,
                                 **kwargs)
     return dataloader
