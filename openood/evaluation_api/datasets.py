@@ -562,10 +562,10 @@ class GaussianDataset(torch.utils.data.Dataset):
                 self.labels = (torch.ones(dataset_size) * num_classes).long()
             else:
                 self.labels = labels
-<<<<<<< HEAD
+#<<<<<<< HEAD
             torch.manual_seed(0)
-=======
->>>>>>> origin/private-branch
+#=======
+#>>>>>>> origin/private-branch
             images = torch.normal(0.5, 0.5, size=(dataset_size,3,img_size,img_size))
             self.images = torch.clamp(images, 0, 1)
             self.transform = transform
@@ -732,8 +732,8 @@ def get_id_ood_dataloader(id_name, data_root, preprocessor, **loader_kwargs):
 
         dataloader_dict = {}
         sub_dataloader_dict = {}
-        train_loader = get_waterbird_dataloader( data_label_correlation=0.7, split="train")
-        val_loader = get_waterbird_dataloader( data_label_correlation=0.7, split="val")
+        train_loader = get_waterbird_dataloader( data_label_correlation=0.9, split="train")
+        val_loader = get_waterbird_dataloader( data_label_correlation=0.9, split="val")
 
 
         sub_dataloader_dict['train'] = train_loader
@@ -768,7 +768,7 @@ def get_id_ood_dataloader(id_name, data_root, preprocessor, **loader_kwargs):
             transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
         ])
 
-        testsetout = ImageFolder("/home/user01/SP_OOD_Experiments/OOD_Datasets/placesbg/",transform=large_transform)
+        testsetout = ImageFolder("/content/drive/MyDrive/OOD_Datasets/placesbg/",transform=large_transform)
         np.random.seed(0)
         subset_indices = np.random.choice(len(testsetout), 2000, replace=False)
         subset_val_indices = subset_indices[:int(0.2 * len(subset_indices))]  
@@ -777,7 +777,7 @@ def get_id_ood_dataloader(id_name, data_root, preprocessor, **loader_kwargs):
         # sub_dataloader_dict_val = {'sp_waterbirds': torch.utils.data.DataLoader(subset_val, batch_size=64, shuffle=False, num_workers=4)}
         # dataloader_dict['ood']['val']= sub_dataloader_dict_val
 
-        testsetout2 = ImageFolder("/home/user01/SP_OOD_Experiments/OOD_Datasets/stable_diffusion/",transform=large_transform)
+        testsetout2 = ImageFolder("/content/openood-edit/content/Spurious_OOD/datasets/waterbird_complete90_forest2water2/",transform=large_transform)
         np.random.seed(0)
 
         subset_indices2 = np.random.choice(len(testsetout2), 2000, replace=False)
@@ -800,13 +800,13 @@ def get_id_ood_dataloader(id_name, data_root, preprocessor, **loader_kwargs):
 
         for dataset_name in ood_datasets:
             if dataset_name == "SVHN":
-                testsetout = svhn.SVHN(f"/home/user01/SP_OOD_Experiments/OOD_Datasets/{dataset_name}", split='test',
+                testsetout = svhn.SVHN(f"/content/drive/MyDrive/OOD_Datasets/{dataset_name}", split='test',
                                     transform=large_transform, download=False)
             elif dataset_name == 'gaussian':
                 testsetout = GaussianDataset(dataset_size =10000, img_size = 224,
                     transform=transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225]))
             else:
-                testsetout = ImageFolder(f"/home/user01/SP_OOD_Experiments/OOD_Datasets/{dataset_name}", transform=large_transform)
+                testsetout = ImageFolder(f"/content/drive/MyDrive/OOD_Datasets/{dataset_name}", transform=large_transform)
 
             num_samples = len(testsetout)
             val_size = int(0.2 * num_samples)  
