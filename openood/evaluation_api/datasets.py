@@ -777,7 +777,7 @@ def get_id_ood_dataloader(id_name, data_root, preprocessor, **loader_kwargs):
         # sub_dataloader_dict_val = {'sp_waterbirds': torch.utils.data.DataLoader(subset_val, batch_size=64, shuffle=False, num_workers=4)}
         # dataloader_dict['ood']['val']= sub_dataloader_dict_val
 
-        testsetout2 = ImageFolder("/content/openood-edit/content/Spurious_OOD/datasets/waterbird_complete90_forest2water2/",transform=large_transform)
+        testsetout2 = ImageFolder("/content/drive/MyDrive/OOD_Datasets/placesbg_diffusion/placesbg",transform=large_transform)
         np.random.seed(0)
 
         subset_indices2 = np.random.choice(len(testsetout2), 2000, replace=False)
